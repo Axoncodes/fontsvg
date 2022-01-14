@@ -1,5 +1,6 @@
 const svgjson = require('svgjson');
 
-const GSUB = require('./lib/gsub')
-const OS2 = require('./lib/os2')
-const CMap = require('./lib/cmap')
+const GSUB = require('./lib/font/gsub')
+const OS2 = require('./lib/font/os2')
+const CMAP = require('./lib/font/cmap')
+const GLYPH = require('./lib/font/glyph')
