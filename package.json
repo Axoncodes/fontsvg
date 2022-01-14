@@ -1,0 +1,51 @@
+{
+  "name": "fontsvg",
+  "version": "0.0.1",
+  "main": "index.js",
+  "description": "Convert SVG icons to Font",
+  "keywords": [
+    "svg",
+    "xml",
+    "json",
+    "convertor",
+    "parser",
+    "Font",
+    "Fontsvg",
+    "svgtofont",
+    "ttf",
+    "otf",
+    "woff",
+    "woff2"
+  ],
+  "author": "Axoncodes <info@axoncodes.com>",
+  "repository": "Rexfont/fontSvg",
+  "bin": {
+    "svgjson": "./index.js",
+    "dev": "nodemon index.js"
+  },
+  "files": [
+    "index.js",
+    "lib/"
+  ],
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.1",
+    "multer": "^1.4.3",
+    "server": "^1.0.36",
+    "svgjson": "^1.1.0"
+  },
+  "devDependencies": {
+    "fs": "^0.0.1-security",
+    "nodemon": "^2.0.15",
+    "npm-run-all": "^4.1.5"
+  }
+}
