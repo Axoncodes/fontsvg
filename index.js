@@ -10,13 +10,13 @@ const fs = require('fs');
  * @retuen returnes the ttf file
  */
 function parseTTF(opt) {
-  return handleFile(opt)
+  return handleInput(opt)
   .then(svg2ttf)
   .then(ttf => Buffer.from(ttf.buffer))
   .then(ttf => fs.writeFileSync(opt.filename, ttf))
 }
 
-async function handleFile(opt) {
+async function handleInput(opt) {
   // info handling
   const { svgFile, fontsvgFile, filename } = opt
   if((!svgFile && !fontsvgFile) || !filename) throw 'ERROR: No Input file was provided'
