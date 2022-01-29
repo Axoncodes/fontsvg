@@ -1,12 +1,13 @@
 const colorHandler = require('./color')
 
-async function styleAssist(fontSvgJson) {
+async function styleAssist(fontJson) {
   let cssFileContent = '';
-  await colorHandler(fontSvgJson)
-  .then(classes => classes.forEach(cssClass => {
-    cssFileContent += cssClass[1];
-  }))
-  return cssFileContent
+
+  fontJson.forEach(tag => {
+    if (tag.tag == 'glyph') {
+      colorHandler(tag)
+    }
+  })
 }
 
 module.exports = styleAssist;
