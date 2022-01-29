@@ -17,8 +17,8 @@ async function styleAssist(fontJson) {
     cssFileContent += fileHandler(glyph, [colorContent, fontFamily])
     // fullClass
     cssFileContent += fontHandler(glyph);
-    cssFileContent += fontfaceHandler(fontface);
   })
+  cssFileContent += fontfaceHandler(fontface);
 
   return cssFileContent
 }

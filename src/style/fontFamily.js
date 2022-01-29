@@ -1,7 +1,5 @@
 function fontFamilyHandler(fontface) {
-  let fileContent = '';
-  fileContent += `font-family: "${fontface.attributes['font-family']}";`;
-  return fileContent;
+  return `font-family: "${fontface.attributes['font-family']}";\n`;
 }
 
 module.exports = fontFamilyHandler;
