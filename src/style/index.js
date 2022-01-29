@@ -3,6 +3,7 @@ const tools = require('../../helpers/tools')
 const colorHandler = require('./color')
 const fontHandler = require('./font')
 const fileHandler = require('./file')
+const fontfaceHandler = require('./fontface')
 
 async function styleAssist(fontJson) {
   let cssFileContent = '';
@@ -14,6 +15,7 @@ async function styleAssist(fontJson) {
     cssFileContent += fileHandler(glyph, [colorContent])
     // fullClass
     cssFileContent += fontHandler(glyph);
+    cssFileContent += fontfaceHandler(fontJson);
   })
 
   return cssFileContent
