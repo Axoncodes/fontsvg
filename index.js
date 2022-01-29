@@ -1,5 +1,7 @@
-const svgJson = require('svgjson');
+const svgJson = require('../svgjson');
 const svg2ttf = require('svg2ttf');
+const styleHandler = require('./src/style')
+const htmlHandler = require('./src/html')
 const fs = require('fs');
 
 /**
@@ -11,15 +13,16 @@ const fs = require('fs');
  */
 function parseTTF(opt) {
   return handleInput(opt)
+  .then(fontAssist)
   .then(svg2ttf)
   .then(ttf => Buffer.from(ttf.buffer))
-  .then(ttf => fs.writeFileSync(opt.filename, ttf))
+  .then(ttf => fs.writeFileSync(`./rextest/font.ttf`, ttf))
 }
 
 async function handleInput(opt) {
   // info handling
-  const { svgFile, fontsvgFile, filename } = opt
-  if((!svgFile && !fontsvgFile) || !filename) throw 'ERROR: No Input file was provided'
+  const { svgFile, fontsvgFile } = opt
+  if((!svgFile && !fontsvgFile)) throw 'ERROR: No Input file was provided'
 
   // read the file (whether svg or fontsvg)
   const input = fs.readFileSync(svgFile || fontsvgFile, 'utf8')
@@ -28,8 +31,14 @@ async function handleInput(opt) {
   // otherwise, convert the svg file to fontsvg and then return
   const fontsvg = await svgJson.convert({ outputFormat: 'fontsvg', input })
   // write the fontsvg file
-  fs.writeFileSync('./testfont.svg', fontsvg)
+  fs.writeFileSync('./rextest/fontsvg.svg', fontsvg)
   return fontsvg
+}
+
+async function fontAssist(fontSvg) {
+  const fontJson = await svgJson.parseJson(fontSvg)
+  styleHandler(fontJson).then(cssFile => fs.writeFileSync('./rextest/style.css', cssFile))
+  htmlHandler(fontJson).then(htmlFile => fs.writeFileSync('./rextest/index.html', htmlFile))
 }
 
 module.exports = parseTTF;
