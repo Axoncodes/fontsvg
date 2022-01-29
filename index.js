@@ -30,6 +30,7 @@ async function handleInput(opt) {
   if(fontsvgFile) return input
   // otherwise, convert the svg file to fontsvg and then return
   const fontsvg = await svgJson.convert({ outputFormat: 'fontsvg', input })
+  if (!fs.existsSync('./rextest')) fs.mkdirSync('./rextest');
   // write the fontsvg file
   fs.writeFileSync('./rextest/fontsvg.svg', fontsvg)
   return fontsvg
