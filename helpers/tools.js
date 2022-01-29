@@ -5,3 +5,8 @@ function extractGlyphs(json) {
   });
   return glyphs;
 }
+
+module.exports = {
+  extractGlyphs,
+  extractGlyphsAsync: json => Promise.resolve(extractGlyphs(json)),
+}
