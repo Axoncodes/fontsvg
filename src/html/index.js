@@ -8,12 +8,14 @@ async function htmlAssist(fontJson) {
     </head>
     <body>
   `;
+  htmlFileContent += `<div>`
   classHandler(fontJson).forEach(htmlClass => {
     htmlFileContent += `<span class="${htmlClass}"></span>\n`;
   })
+  htmlFileContent += `</div>`
   htmlFileContent += `
-  </body>
-  </html>
+    </body>
+    </html>
   `;
   return htmlFileContent
 }

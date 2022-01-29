@@ -5,6 +5,7 @@ const fontHandler = require('./font')
 const fileHandler = require('./file')
 const fontfaceHandler = require('./fontface')
 const fontFamilyHandler = require('./fontFamily')
+const positionHandler = require('./position')
 
 async function styleAssist(fontJson) {
   let cssFileContent = '';
@@ -14,7 +15,8 @@ async function styleAssist(fontJson) {
     // subClass
     let colorContent = colorHandler(glyph);
     let fontFamily = fontFamilyHandler(fontface)
-    cssFileContent += fileHandler(glyph, [colorContent, fontFamily])
+    let position = positionHandler(fontface)
+    cssFileContent += fileHandler(glyph, [colorContent, fontFamily, position])
     // fullClass
     cssFileContent += fontHandler(glyph);
   })
