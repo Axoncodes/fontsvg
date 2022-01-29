@@ -29,17 +29,16 @@ async function handleInput(opt) {
   // if the parameter fontsvgFile was availabel, then just return the file content
   if(fontsvgFile) return input
   // otherwise, convert the svg file to fontsvg and then return
-  const fontsvg = await svgJson.convert({ outputFormat: 'fontsvg', input })
-  if (!fs.existsSync('./rextest')) fs.mkdirSync('./rextest');
-  // write the fontsvg file
-  fs.writeFileSync('./rextest/fontsvg.svg', fontsvg)
-  return fontsvg
+  return svgJson.convert({ outputFormat: 'fontsvg', input })
 }
 
 async function fontAssist(fontSvg) {
+  if (!fs.existsSync('./rextest')) fs.mkdirSync('./rextest');
+  fs.writeFileSync('./rextest/fontsvg.svg', fontSvg)
   const fontJson = await svgJson.parseJson(fontSvg)
   styleHandler(fontJson).then(cssFile => fs.writeFileSync('./rextest/style.css', cssFile))
   htmlHandler(fontJson).then(htmlFile => fs.writeFileSync('./rextest/index.html', htmlFile))
+  return fontSvg;
 }
 
 module.exports = parseTTF;
