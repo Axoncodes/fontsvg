@@ -1,11 +1,10 @@
 const xjs = require('@axoncodes/xjs')
 const tools = require('../../helpers/tools')
 
-function fontfaceHandler(fontjson) {
-  const fontface = tools.extractFontface(fontjson)
+function fontfaceHandler(fontface) {
   let fileContent = '';
   fileContent += `@font-face {`
-  fileContent += `font-family: "${fontface.attributes.fontname}";`;
+  fileContent += `font-family: "${fontface.attributes['font-family']}";`;
   fileContent += `src: url('./font.ttf');`;
   fileContent += `} `;
   return fileContent;
