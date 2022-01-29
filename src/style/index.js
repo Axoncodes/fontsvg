@@ -1,13 +1,22 @@
+const tools = require('../../helpers/tools')
+
 const colorHandler = require('./color')
+const fontHandler = require('./font')
+const fileHandler = require('./file')
 
 async function styleAssist(fontJson) {
   let cssFileContent = '';
 
-  fontJson.forEach(tag => {
-    if (tag.tag == 'glyph') {
-      colorHandler(tag)
-    }
+  tools.extractGlyphs(fontJson)
+  .forEach((glyph) => {
+    // subClass
+    let colorContent = colorHandler(glyph);
+    cssFileContent += fileHandler(glyph, [colorContent])
+    // fullClass
+    cssFileContent += fontHandler(glyph);
   })
+
+  return cssFileContent
 }
 
 module.exports = styleAssist;
