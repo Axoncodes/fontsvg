@@ -1,6 +1,6 @@
 {
-  "name": "@rexfont/parsefont",
-  "version": "2.0.0",
+  "name": "parsefont",
+  "version": "2.0.1",
   "main": "index.js",
   "description": "Convert SVG icons to Font",
   "keywords": [
