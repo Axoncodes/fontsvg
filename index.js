@@ -22,14 +22,17 @@ function parseTTF(opt) {
 async function handleInput(opt) {
   // info handling
   const { svgFile, fontsvgFile } = opt
-  if((!svgFile && !fontsvgFile)) throw 'ERROR: No Input file was provided'
+  let { fontname, unicodePrefix } = opt
+  if (!svgFile && !fontsvgFile) throw 'ERROR: No Input file was provided'
+  if (!fontname) fontname = 'rexfont'
+  if (!unicodePrefix) unicodePrefix = 'RX'
 
   // read the file (whether svg or fontsvg)
   const input = fs.readFileSync(svgFile || fontsvgFile, 'utf8')
   // if the parameter fontsvgFile was availabel, then just return the file content
   if(fontsvgFile) return input
   // otherwise, convert the svg file to fontsvg and then return
-  return svgJson.convert({ outputFormat: 'fontsvg', input })
+  return svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix })
 }
 
 async function fontAssist(fontSvg) {
