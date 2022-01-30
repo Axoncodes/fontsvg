@@ -47,8 +47,6 @@ function handleInput(opt) {
 }
 
 function fontAssist({ fontSvg, fontname }) {
-  if (!fs.existsSync(`./${fontname}`)) fs.mkdirSync(`./${fontname}`);
-  fs.writeFileSync(`./${fontname}/fontsvg.svg`, fontSvg)
   return svgJson.parseJson(fontSvg)
   .then(async fontJson => ({
     style: await styleHandler(fontJson),
@@ -60,6 +58,8 @@ function fontAssist({ fontSvg, fontname }) {
 }
 
 function fontAssistWrite({ style, html, fontname, fontSvg }) {
+  if (!fs.existsSync(`./${fontname}`)) fs.mkdirSync(`./${fontname}`);
+  fs.writeFileSync(`./${fontname}/fontsvg.svg`, fontSvg)
   fs.writeFileSync(`./${fontname}/style.css`, style)
   fs.writeFileSync(`./${fontname}/index.html`, html)
   return ({ fontSvg, fontname });
