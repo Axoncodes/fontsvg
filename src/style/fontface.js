@@ -1,6 +1,3 @@
-const xjs = require('@axoncodes/xjs')
-const tools = require('../../helpers/tools')
-
 function fontfaceHandler(fontface) {
   let fileContent = '';
   fileContent += `@font-face {\n`
