@@ -1,6 +1,6 @@
 {
   "name": "parsefont",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "main": "index.js",
   "description": "Convert SVG icons to Font",
   "keywords": [
@@ -44,7 +44,7 @@
     "multer": "^1.4.3",
     "server": "^1.0.36",
     "svg2ttf": "^6.0.3",
-    "svgjson": "^1.3.1",
+    "svgjson": "^1.4.1",
     "ttf2eot": "^3.0.0",
     "ttf2woff": "^3.0.0"
   },
