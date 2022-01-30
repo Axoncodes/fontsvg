@@ -1,5 +1,7 @@
 const svgJson = require('../svgjson');
 const svg2ttf = require('svg2ttf');
+const ttf2woff = require('ttf2woff');
+const ttf2eot = require('ttf2eot');
 const styleHandler = require('./src/style')
 const htmlHandler = require('./src/html')
 const fs = require('fs');
@@ -14,9 +16,7 @@ const fs = require('fs');
 function parseTTF(opt) {
   return handleInput(opt)
   .then(fontAssist)
-  .then(svg2ttf)
-  .then(ttf => Buffer.from(ttf.buffer))
-  .then(ttf => fs.writeFileSync(`./rextest/font.ttf`, ttf))
+  .then(fontFormats)
 }
 
 async function handleInput(opt) {
@@ -42,6 +42,15 @@ async function fontAssist(fontSvg) {
   styleHandler(fontJson).then(cssFile => fs.writeFileSync('./rextest/style.css', cssFile))
   htmlHandler(fontJson).then(htmlFile => fs.writeFileSync('./rextest/index.html', htmlFile))
   return fontSvg;
+}
+
+function fontFormats(fontSvg) {
+  const svg2ttfbuf = svg2ttf(fontSvg)
+  const ttf2woffbuf = ttf2woff(svg2ttfbuf)
+  const ttf2eotbuf = ttf2eot(svg2ttfbuf)
+  fs.writeFileSync(`./rextest/font.ttf`, Buffer.from(svg2ttfbuf.buffer))
+  fs.writeFileSync(`./rextest/font.woff`, Buffer.from(ttf2woffbuf))
+  fs.writeFileSync(`./rextest/font.eot`, Buffer.from(ttf2eotbuf))
 }
 
 module.exports = parseTTF;
