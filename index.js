@@ -13,13 +13,23 @@ const fs = require('fs');
  * @param {string} filename The name of the file for the ttf font to be stored in
  * @retuen returnes the ttf file
  */
-function parseTTF(opt) {
+function write(opt) {
   return handleInput(opt)
   .then(fontAssist)
+  .then(fontAssistWrite)
   .then(fontFormats)
+  .then(fontFormatsWrite)
 }
 
-async function handleInput(opt) {
+function get(opt) {
+  return handleInput(opt)
+  .then(async ({ fontSvg, fontname }) => ({
+    ...await fontAssist({ fontSvg, fontname }),
+    ...fontFormats({ fontSvg, fontname })
+  }))
+}
+
+function handleInput(opt) {
   // info handling
   const { svgFile, fontsvgFile } = opt
   let { fontname, unicodePrefix } = opt
@@ -30,23 +40,28 @@ async function handleInput(opt) {
   // read the file (whether svg or fontsvg)
   const input = fs.readFileSync(svgFile || fontsvgFile, 'utf8')
   // if the parameter fontsvgFile was availabel, then just return the file content
-  if(fontsvgFile) return ({
-    fontSvg: input,
-    fontname,
-  })
+  if(fontsvgFile) return ({ fontSvg: input, fontname })
   // otherwise, convert the svg file to fontsvg and then return
-  return ({
-    fontSvg: await svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }),
-    fontname,
-  })
+  return svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix })
+  .then(fontSvg => ({ fontSvg, fontname }))
 }
 
-async function fontAssist({ fontSvg, fontname }) {
+function fontAssist({ fontSvg, fontname }) {
   if (!fs.existsSync(`./${fontname}`)) fs.mkdirSync(`./${fontname}`);
   fs.writeFileSync(`./${fontname}/fontsvg.svg`, fontSvg)
-  const fontJson = await svgJson.parseJson(fontSvg)
-  styleHandler(fontJson).then(cssFile => fs.writeFileSync(`./${fontname}/style.css`, cssFile))
-  htmlHandler(fontJson).then(htmlFile => fs.writeFileSync(`./${fontname}/index.html`, htmlFile))
+  return svgJson.parseJson(fontSvg)
+  .then(async fontJson => ({
+    style: await styleHandler(fontJson),
+    html: await htmlHandler(fontJson),
+    fontname,
+    fontJson,
+    fontSvg,
+  }));
+}
+
+function fontAssistWrite({ style, html, fontname, fontSvg }) {
+  fs.writeFileSync(`./${fontname}/style.css`, style)
+  fs.writeFileSync(`./${fontname}/index.html`, html)
   return ({ fontSvg, fontname });
 }
 
@@ -54,9 +69,21 @@ function fontFormats({ fontSvg, fontname }) {
   const svg2ttfbuf = svg2ttf(fontSvg)
   const ttf2woffbuf = ttf2woff(svg2ttfbuf)
   const ttf2eotbuf = ttf2eot(svg2ttfbuf)
-  fs.writeFileSync(`./${fontname}/font.ttf`, Buffer.from(svg2ttfbuf.buffer))
-  fs.writeFileSync(`./${fontname}/font.woff`, Buffer.from(ttf2woffbuf))
-  fs.writeFileSync(`./${fontname}/font.eot`, Buffer.from(ttf2eotbuf))
+  return ({
+    fontname,
+    svg2ttfbuf: Buffer.from(svg2ttfbuf.buffer),
+    ttf2woffbuf: Buffer.from(ttf2woffbuf),
+    ttf2eotbuf: Buffer.from(ttf2eotbuf),
+  });
 }
 
-module.exports = parseTTF;
+function fontFormatsWrite({ fontname, svg2ttfbuf, ttf2woffbuf, ttf2eotbuf }) {
+  fs.writeFileSync(`./${fontname}/font.ttf`, svg2ttfbuf)
+  fs.writeFileSync(`./${fontname}/font.woff`, ttf2woffbuf)
+  fs.writeFileSync(`./${fontname}/font.eot`, ttf2eotbuf)
+}
+
+module.exports = {
+  write,
+  get,
+};
