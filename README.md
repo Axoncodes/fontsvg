@@ -13,7 +13,7 @@ Generate fonts including required file assist for your svg icons
 
 ### Example :
 ```
-const parseFont = require('@rexfont/parseFont');
+const parseFont = require('parsefont');
 fontsvg({
   svgFile: './alien.svg',
   fontname: 'ifont',
