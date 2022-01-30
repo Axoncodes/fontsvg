@@ -30,27 +30,33 @@ async function handleInput(opt) {
   // read the file (whether svg or fontsvg)
   const input = fs.readFileSync(svgFile || fontsvgFile, 'utf8')
   // if the parameter fontsvgFile was availabel, then just return the file content
-  if(fontsvgFile) return input
+  if(fontsvgFile) return ({
+    fontSvg: input,
+    fontname,
+  })
   // otherwise, convert the svg file to fontsvg and then return
-  return svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix })
+  return ({
+    fontSvg: await svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }),
+    fontname,
+  })
 }
 
-async function fontAssist(fontSvg) {
-  if (!fs.existsSync('./rextest')) fs.mkdirSync('./rextest');
-  fs.writeFileSync('./rextest/fontsvg.svg', fontSvg)
+async function fontAssist({ fontSvg, fontname }) {
+  if (!fs.existsSync(`./${fontname}`)) fs.mkdirSync(`./${fontname}`);
+  fs.writeFileSync(`./${fontname}/fontsvg.svg`, fontSvg)
   const fontJson = await svgJson.parseJson(fontSvg)
-  styleHandler(fontJson).then(cssFile => fs.writeFileSync('./rextest/style.css', cssFile))
-  htmlHandler(fontJson).then(htmlFile => fs.writeFileSync('./rextest/index.html', htmlFile))
-  return fontSvg;
+  styleHandler(fontJson).then(cssFile => fs.writeFileSync(`./${fontname}/style.css`, cssFile))
+  htmlHandler(fontJson).then(htmlFile => fs.writeFileSync(`./${fontname}/index.html`, htmlFile))
+  return ({ fontSvg, fontname });
 }
 
-function fontFormats(fontSvg) {
+function fontFormats({ fontSvg, fontname }) {
   const svg2ttfbuf = svg2ttf(fontSvg)
   const ttf2woffbuf = ttf2woff(svg2ttfbuf)
   const ttf2eotbuf = ttf2eot(svg2ttfbuf)
-  fs.writeFileSync(`./rextest/font.ttf`, Buffer.from(svg2ttfbuf.buffer))
-  fs.writeFileSync(`./rextest/font.woff`, Buffer.from(ttf2woffbuf))
-  fs.writeFileSync(`./rextest/font.eot`, Buffer.from(ttf2eotbuf))
+  fs.writeFileSync(`./${fontname}/font.ttf`, Buffer.from(svg2ttfbuf.buffer))
+  fs.writeFileSync(`./${fontname}/font.woff`, Buffer.from(ttf2woffbuf))
+  fs.writeFileSync(`./${fontname}/font.eot`, Buffer.from(ttf2eotbuf))
 }
 
 module.exports = parseTTF;
