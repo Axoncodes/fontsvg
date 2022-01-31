@@ -1,4 +1,4 @@
-const svgJson = require('../svgjson');
+const svgJson = require('svgjson');
 const svg2ttf = require('svg2ttf');
 const ttf2woff = require('ttf2woff');
 const ttf2eot = require('ttf2eot');
