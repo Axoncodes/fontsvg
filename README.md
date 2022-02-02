@@ -55,4 +55,9 @@ This method will return you the data that of the files that would be written to 
 
 You can use the html file to examine the generated fonts and use the css file as initial css required
 
+## Web Interface
+You can also convert your icons through this interface which is powered by an API using the same parsefont module
+- Interface: [rexfont.com/parsefont](https://rexfont.com/parsefont)
+- API repo: [parsefont_api](https://github.com/Rexfont/parsefont_api)
+
 Brough to you by [REXFONT](https://rexfont.com)
