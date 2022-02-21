@@ -6,13 +6,6 @@ const styleHandler = require('./src/style')
 const htmlHandler = require('./src/html')
 const fs = require('fs');
 
-/**
- *  
- * @param {string} svgFile If it's an svg file you want to parse to ttf file, fillout this parameter
- * @param {string} fontsvgFile Otherwise, it would be a fontsvgFile requsted to parse to ttf file
- * @param {string} filename The name of the file for the ttf font to be stored in
- * @retuen returnes the ttf file
- */
 function write(opt) {
   return handleInput(opt)
   .then(fontAssist)
@@ -29,6 +22,13 @@ function get(opt) {
   }))
 }
 
+/**
+ *  
+ * @param {string} svgFile If it's an svg file you want to parse to ttf file, fillout this parameter
+ * @param {string} fontsvgFile Otherwise, it would be a fontsvgFile requsted to parse to ttf file
+ * @param {string} filename The name of the file for the ttf font to be stored in
+ * @retuen returnes the ttf file
+ */
 function handleInput(opt) {
   // info handling
   const { svgFile, fontsvgFile } = opt
