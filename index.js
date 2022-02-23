@@ -1,10 +1,11 @@
-const svgJson = require('svgjson');
+const svgJson = require('../svgjson');
 const svg2ttf = require('svg2ttf');
 const ttf2woff = require('ttf2woff');
 const ttf2eot = require('ttf2eot');
 const styleHandler = require('./src/style')
 const htmlHandler = require('./src/html')
 const fs = require('fs');
+const tools = require('./helpers/tools')
 
 function write(opt) {
   return handleInput(opt)
@@ -24,26 +25,60 @@ function get(opt) {
 
 /**
  *  
- * @param {string} svgFile If it's an svg file you want to parse to ttf file, fillout this parameter
+ * @param {array} svgFiles Array of SVG files addresses to be converted into single font
  * @param {string} fontsvgFile Otherwise, it would be a fontsvgFile requsted to parse to ttf file
  * @param {string} filename The name of the file for the ttf font to be stored in
  * @retuen returnes the ttf file
  */
 function handleInput(opt) {
   // info handling
-  const { svgFile, fontsvgFile } = opt
+  const { svgFiles, fontsvgFile } = opt
   let { fontname, unicodePrefix } = opt
-  if (!svgFile && !fontsvgFile) throw 'ERROR: No Input file was provided'
+  if ((!svgFiles || !svgFiles.length) && !fontsvgFile) throw 'ERROR: No Input file was provided'
   if (!fontname) fontname = 'rexfont'
   if (!unicodePrefix) unicodePrefix = 'RX'
 
-  // read the file (whether svg or fontsvg)
-  const input = fs.readFileSync(svgFile || fontsvgFile, 'utf8')
-  // if the parameter fontsvgFile was availabel, then just return the file content
-  if(fontsvgFile) return ({ fontSvg: input, fontname })
-  // otherwise, convert the svg file to fontsvg and then return
-  return svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix })
-  .then(fontSvg => ({ fontSvg, fontname }))
+  if (svgFiles) {
+    // read and merge the files
+    return mergeSvgs(svgFiles)
+    // otherwise, convert the svg file to fontsvg and then return
+    .then(input => svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }))
+    .then(fontSvg => ({ fontSvg, fontname }))
+  } else {
+    // read the file (whether svg or fontsvg)
+    return fs.readFileSync(fontsvgFile, 'utf8')
+    // if the parameter fontsvgFile was availabel, then just return the file content
+    .then(fontSvg => ({ fontSvg, fontname }))
+  }
+}
+
+async function mergeSvgs(svgFiles) {
+  let count = 0
+  let content = ''
+  // get informations
+  const svgsData = await tools.readFiles(svgFiles)
+  const svgsPathes = svgsData.map(tools.extractPathes)
+  const svgsStyles = svgsData.map(tools.extractStyles)
+
+  // generate the singular svg file
+  content += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${svgsData[0][0].attributes.viewBox.toString().replaceAll(',', ' ')}>\n`
+  content += `<defs><style>`
+  svgsStyles.flat().flat().forEach(style => {
+    content += `${style[0]} {`
+    style[1].forEach(properties => {
+      if (properties && properties.length)
+        content += `${properties.toString().replaceAll(',', ':')};`
+    })
+    content += `}\n`
+  })
+  content += `</style></defs>`
+  svgsPathes.forEach((pathes, count) => {
+    pathes.forEach(path => {
+      content += path.tag == 'path' ? `<path rxcode="${count}" d="${path.attributes.d}"/>\n` : `<${path.tag}>`
+    })
+  })
+  content += `</svg>`
+  return content
 }
 
 function fontAssist({ fontSvg, fontname }) {
