@@ -62,16 +62,20 @@ async function mergeSvgs(svgFiles) {
 
   // generate the singular svg file
   content += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${svgsData[0][0].attributes.viewBox.toString().replaceAll(',', ' ')}>\n`
-  content += `<defs><style>`
-  svgsStyles.flat().flat().forEach(style => {
-    content += `${style[0]} {`
-    style[1].forEach(properties => {
-      if (properties && properties.length)
-        content += `${properties.toString().replaceAll(',', ':')};`
+  content += `<defs>`
+  if (svgsStyles.flat().flat().length > 0) {
+    content += `<style>`
+    svgsStyles.flat().flat().forEach(style => {
+      content += `${style[0]} {`
+      style[1].forEach(properties => {
+        if (properties && properties.length)
+          content += `${properties.toString().replaceAll(',', ':')};`
+      })
+      content += `}\n`
     })
-    content += `}\n`
-  })
-  content += `</style></defs>`
+    content += `</style>`
+  }
+  content += `</defs>`
   svgsPathes.forEach((pathes, count) => {
     pathes.forEach(path => {
       content += path.tag == 'path' ? `<path rxcode="${count}" d="${path.attributes.d}"/>\n` : `<${path.tag}>`
