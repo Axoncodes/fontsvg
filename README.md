@@ -28,8 +28,10 @@ There will be a folder generated with the fontname selected(or default), includi
 - font.eot
 - fontsvg.svg
 - index.html
-- style.css
+- font.css
 
+#### New feature :
+Ability to handle multiple icons(merge icons)
 
 #### Example (the 'get' method) :
 ```
