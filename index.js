@@ -1,4 +1,4 @@
-const svgJson = require('../svgjson');
+const svgJson = require('svgjson');
 const svg2ttf = require('svg2ttf');
 const ttf2woff = require('ttf2woff');
 const ttf2eot = require('ttf2eot');
@@ -53,19 +53,19 @@ function handleInput(opt) {
 }
 
 async function mergeSvgs(svgFiles) {
-  let count = 0
   let content = ''
   // get informations
   const svgsData = await tools.readFiles(svgFiles)
-  const svgsPathes = svgsData.map(tools.extractPathes)
-  const svgsStyles = svgsData.map(tools.extractStyles)
+  .then(svgsData => svgJson.encodeClasses(svgsData))
+  const svgsPathes = svgsData.map(svgJson.extractPathes)
+  const svgsStyles = svgsData.map(svgJson.extractStyles)
 
   // generate the singular svg file
   content += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${svgsData[0][0].attributes.viewBox.toString().replaceAll(',', ' ')}>\n`
   content += `<defs>`
   if (svgsStyles.flat().flat().length > 0) {
     content += `<style>`
-    svgsStyles.flat().flat().forEach(style => {
+    svgsStyles.flat().flat().forEach((style, i) => {
       content += `${style[0]} {`
       style[1].forEach(properties => {
         if (properties && properties.length)
@@ -76,9 +76,11 @@ async function mergeSvgs(svgFiles) {
     content += `</style>`
   }
   content += `</defs>`
+  
   svgsPathes.forEach((pathes, count) => {
     pathes.forEach(path => {
-      content += path.tag == 'path' ? `<path rxcode="${count}" d="${path.attributes.d}"/>\n` : `<${path.tag}>`
+      let cclass = path.attributes && path.attributes.class ? path.attributes.class  : ''
+      content += path.tag == 'path' ? `<path class="${cclass}" rxcode="${count}" d="${path.attributes.d}"/>\n` : (path.tag == 'g' ? `<${path.tag} class="${cclass}">` : '</g>')
     })
   })
   content += `</svg>`
@@ -88,8 +90,8 @@ async function mergeSvgs(svgFiles) {
 function fontAssist({ fontSvg, fontname }) {
   return svgJson.parseJson(fontSvg)
   .then(async fontJson => ({
-    style: await styleHandler(fontJson),
     html: await htmlHandler(fontJson),
+    style: await styleHandler(fontJson),
     fontname,
     fontJson,
     fontSvg,
@@ -99,7 +101,7 @@ function fontAssist({ fontSvg, fontname }) {
 function fontAssistWrite({ style, html, fontname, fontSvg }) {
   if (!fs.existsSync(`./${fontname}`)) fs.mkdirSync(`./${fontname}`);
   fs.writeFileSync(`./${fontname}/fontsvg.svg`, fontSvg)
-  fs.writeFileSync(`./${fontname}/style.css`, style)
+  fs.writeFileSync(`./${fontname}/font.css`, style)
   fs.writeFileSync(`./${fontname}/index.html`, html)
   return ({ fontSvg, fontname });
 }

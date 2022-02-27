@@ -1,22 +1,14 @@
-const classHandler = require('./classHandler');
+const svgJSon = require('svgJson')
 
 async function htmlAssist(fontJson) {
-  let htmlFileContent = `
-    <html>
-    <head>
-      <link rel="stylesheet" href="./style.css" />
-    </head>
-    <body>
+  let htmlFileContent = `<html><head>
+      <link rel="stylesheet" href="./font.css" />
+    </head><body>
   `;
-  htmlFileContent += `<div>`
-  classHandler(fontJson).forEach(htmlClass => {
-    htmlFileContent += `<span class="${htmlClass}"></span>\n`;
+  Object.entries(svgJSon.extractGlyphSets(fontJson)).forEach((glyphs, i) => {
+    htmlFileContent += `<i class="${glyphs[0]} rexfontinc"></i>\n`;
   })
-  htmlFileContent += `</div>`
-  htmlFileContent += `
-    </body>
-    </html>
-  `;
+  htmlFileContent += `</body></html>`;
   return htmlFileContent
 }
 
