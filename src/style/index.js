@@ -1,8 +1,6 @@
 const tools = require('../../helpers/tools')
-
+const svgJSon = require('svgJson')
 const colorHandler = require('./color')
-const fontHandler = require('./font')
-const fileHandler = require('./file')
 const fontfaceHandler = require('./fontface')
 const fontFamilyHandler = require('./fontFamily')
 const positionHandler = require('./position')
@@ -10,15 +8,19 @@ const positionHandler = require('./position')
 async function styleAssist(fontJson) {
   let cssFileContent = '';
   const fontface = tools.extractFontface(fontJson)
-  tools.extractGlyphs(fontJson)
-  .forEach((glyph) => {
-    // subClass
-    let colorContent = colorHandler(glyph);
-    let fontFamily = fontFamilyHandler(fontface)
-    let position = positionHandler(fontface)
-    cssFileContent += fileHandler(glyph, [colorContent, fontFamily, position])
-    // fullClass
-    cssFileContent += fontHandler(glyph);
+  cssFileContent += `.rexfontinc {
+    ${fontFamilyHandler(fontface)};
+    font-style: normal;
+  }`
+  Object.entries(svgJSon.extractGlyphSets(fontJson)).forEach((glyphs, i) => {
+    glyphs[1].forEach((glyph, j) => {
+      let order = parseInt(glyph.attributes.unicodeOrder)
+      cssFileContent += `.${glyphs[0]}:${order ? 'after' : 'before'} {
+        content: "${glyph.attributes.unicode}";
+        ${positionHandler(glyph)}
+        ${colorHandler(glyph)}
+      }\n`
+    })
   })
   cssFileContent += fontfaceHandler(fontface);
 

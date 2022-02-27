@@ -1,9 +1,10 @@
-function extractGlyphs(json) {
-  const glyphs = [];
-  json.forEach(tag => {
-    if (tag.tag == 'glyph') glyphs.push(tag);
-  });
-  return glyphs;
+const fs = require('fs')
+const svgJson = require('svgjson')
+
+function readFiles(files) {
+  return Promise.all(files.map(file => 
+    svgJson.parseJson(fs.readFileSync(file, 'utf8'))
+  ))
 }
 
 function extractFontface(json) {
@@ -15,7 +16,6 @@ function extractFontface(json) {
 }
 
 module.exports = {
-  extractGlyphs,
-  extractGlyphsAsync: json => Promise.resolve(extractGlyphs(json)),
   extractFontface,
+  readFiles,
 }

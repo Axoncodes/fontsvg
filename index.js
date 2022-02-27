@@ -5,6 +5,7 @@ const ttf2eot = require('ttf2eot');
 const styleHandler = require('./src/style')
 const htmlHandler = require('./src/html')
 const fs = require('fs');
+const tools = require('./helpers/tools')
 
 function write(opt) {
   return handleInput(opt)
@@ -24,33 +25,73 @@ function get(opt) {
 
 /**
  *  
- * @param {string} svgFile If it's an svg file you want to parse to ttf file, fillout this parameter
+ * @param {array} svgFiles Array of SVG files addresses to be converted into single font
  * @param {string} fontsvgFile Otherwise, it would be a fontsvgFile requsted to parse to ttf file
  * @param {string} filename The name of the file for the ttf font to be stored in
  * @retuen returnes the ttf file
  */
 function handleInput(opt) {
   // info handling
-  const { svgFile, fontsvgFile } = opt
+  const { svgFiles, fontsvgFile } = opt
   let { fontname, unicodePrefix } = opt
-  if (!svgFile && !fontsvgFile) throw 'ERROR: No Input file was provided'
+  if ((!svgFiles || !svgFiles.length) && !fontsvgFile) throw 'ERROR: No Input file was provided'
   if (!fontname) fontname = 'rexfont'
   if (!unicodePrefix) unicodePrefix = 'RX'
 
-  // read the file (whether svg or fontsvg)
-  const input = fs.readFileSync(svgFile || fontsvgFile, 'utf8')
-  // if the parameter fontsvgFile was availabel, then just return the file content
-  if(fontsvgFile) return ({ fontSvg: input, fontname })
-  // otherwise, convert the svg file to fontsvg and then return
-  return svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix })
-  .then(fontSvg => ({ fontSvg, fontname }))
+  if (svgFiles) {
+    // read and merge the files
+    return mergeSvgs(svgFiles)
+    // otherwise, convert the svg file to fontsvg and then return
+    .then(input => svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }))
+    .then(fontSvg => ({ fontSvg, fontname }))
+  } else {
+    // read the file (whether svg or fontsvg)
+    return fs.readFileSync(fontsvgFile, 'utf8')
+    // if the parameter fontsvgFile was availabel, then just return the file content
+    .then(fontSvg => ({ fontSvg, fontname }))
+  }
+}
+
+async function mergeSvgs(svgFiles) {
+  let content = ''
+  // get informations
+  const svgsData = await tools.readFiles(svgFiles)
+  .then(svgsData => svgJson.encodeClasses(svgsData))
+  const svgsPathes = svgsData.map(svgJson.extractPathes)
+  const svgsStyles = svgsData.map(svgJson.extractStyles)
+
+  // generate the singular svg file
+  content += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${svgsData[0][0].attributes.viewBox.toString().replaceAll(',', ' ')}>\n`
+  content += `<defs>`
+  if (svgsStyles.flat().flat().length > 0) {
+    content += `<style>`
+    svgsStyles.flat().flat().forEach((style, i) => {
+      content += `${style[0]} {`
+      style[1].forEach(properties => {
+        if (properties && properties.length)
+          content += `${properties.toString().replaceAll(',', ':')};`
+      })
+      content += `}\n`
+    })
+    content += `</style>`
+  }
+  content += `</defs>`
+  
+  svgsPathes.forEach((pathes, count) => {
+    pathes.forEach(path => {
+      let cclass = path.attributes && path.attributes.class ? path.attributes.class  : ''
+      content += path.tag == 'path' ? `<path class="${cclass}" rxcode="${count}" d="${path.attributes.d}"/>\n` : (path.tag == 'g' ? `<${path.tag} class="${cclass}">` : '</g>')
+    })
+  })
+  content += `</svg>`
+  return content
 }
 
 function fontAssist({ fontSvg, fontname }) {
   return svgJson.parseJson(fontSvg)
   .then(async fontJson => ({
-    style: await styleHandler(fontJson),
     html: await htmlHandler(fontJson),
+    style: await styleHandler(fontJson),
     fontname,
     fontJson,
     fontSvg,
@@ -60,7 +101,7 @@ function fontAssist({ fontSvg, fontname }) {
 function fontAssistWrite({ style, html, fontname, fontSvg }) {
   if (!fs.existsSync(`./${fontname}`)) fs.mkdirSync(`./${fontname}`);
   fs.writeFileSync(`./${fontname}/fontsvg.svg`, fontSvg)
-  fs.writeFileSync(`./${fontname}/style.css`, style)
+  fs.writeFileSync(`./${fontname}/font.css`, style)
   fs.writeFileSync(`./${fontname}/index.html`, html)
   return ({ fontSvg, fontname });
 }
