@@ -1,5 +1,5 @@
 const tools = require('../../helpers/tools')
-const svgJSon = require('svgjson)
+const svgJSon = require('svgjson')
 const colorHandler = require('./color')
 const fontfaceHandler = require('./fontface')
 const fontFamilyHandler = require('./fontFamily')
