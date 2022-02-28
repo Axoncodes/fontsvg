@@ -33,7 +33,7 @@
     "dev": "nodemon app.js"
   },
   "dependencies": {
-    "@axoncodes/xjs": "^1.0.2",
+    "@axoncodes/xjs": "^1.1.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -44,7 +44,7 @@
     "multer": "^1.4.3",
     "server": "^1.0.36",
     "svg2ttf": "^6.0.3",
-    "svgjson": "^1.5.0",
+    "svgjson": "^1.5.1",
     "ttf2eot": "^3.0.0",
     "ttf2woff": "^3.0.0"
   },
