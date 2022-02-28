@@ -11,6 +11,7 @@ async function styleAssist(fontJson) {
   cssFileContent += `.rexfontinc {
     ${fontFamilyHandler(fontface)};
     font-style: normal;
+    position: relative;
   }`
   Object.entries(svgJSon.extractGlyphSets(fontJson)).forEach((glyphs, i) => {
     glyphs[1].forEach((glyph, j) => {
