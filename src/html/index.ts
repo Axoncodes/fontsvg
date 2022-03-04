@@ -1,6 +1,6 @@
 const svgJSon = require('svgjson')
 
-async function htmlAssist(fontJson) {
+export default async function htmlAssist(fontJson) {
   let htmlFileContent = `<html><head>
       <link rel="stylesheet" href="./font.css" />
     </head><body>
@@ -11,5 +11,3 @@ async function htmlAssist(fontJson) {
   htmlFileContent += `</body></html>`;
   return htmlFileContent
 }
-
-module.exports = htmlAssist;

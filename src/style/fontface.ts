@@ -1,4 +1,4 @@
-function fontfaceHandler(fontface) {
+export default function fontfaceHandler(fontface) {
   let fileContent = '';
   fileContent += `@font-face {\n`
   fileContent += `font-family: "${fontface.attributes['font-family']}";\n`;
@@ -11,5 +11,3 @@ function fontfaceHandler(fontface) {
   fileContent += `}\n`;
   return fileContent;
 }
-
-module.exports = fontfaceHandler

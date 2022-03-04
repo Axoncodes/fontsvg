@@ -1,6 +1,6 @@
-const xjs = require('@axoncodes/xjs')
+// const xjs = require('@axoncodes/xjs')
 
-function fileHandler(glyph, subContentArr) {
+export default function fileHandler(glyph, subContentArr) {
   let fileContent = '';
   if (parseInt(glyph.attributes.unicodeOrder) == 0) {
     const name = glyph.attributes.unicodeBase;
@@ -15,5 +15,3 @@ function fileHandler(glyph, subContentArr) {
 
   return fileContent;
 }
-
-module.exports = fileHandler

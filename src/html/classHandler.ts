@@ -1,6 +1,6 @@
-const xjs = require('@axoncodes/xjs')
+import xjs from '@axoncodes/xjs'
 
-function classHandler(fontJson) {
+export default function classHandler(fontJson) {
   return xjs.map(fontJson, (tag) => {
     if (tag.tag == 'glyph') {
       return {
@@ -11,5 +11,3 @@ function classHandler(fontJson) {
     }
   })
 }
-
-module.exports = classHandler;

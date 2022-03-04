@@ -1,4 +1,4 @@
-function fontHandler(glyph) {
+export default function fontHandler(glyph) {
   let subfileContent = '';
   const name = glyph.attributes.unicodeBase;
   const order = parseInt(glyph.attributes.unicodeOrder);
@@ -8,5 +8,3 @@ function fontHandler(glyph) {
   subfileContent += `}\n`;
   return subfileContent;
 }
-
-module.exports = fontHandler

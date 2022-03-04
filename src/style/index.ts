@@ -1,19 +1,19 @@
-const tools = require('../../helpers/tools')
-const svgJSon = require('svgjson')
-const colorHandler = require('./color')
-const fontfaceHandler = require('./fontface')
-const fontFamilyHandler = require('./fontFamily')
-const positionHandler = require('./position')
+import {extractFontface} from '../../helpers/tools'
+import svgJSon from 'svgjson'
+import colorHandler from './color'
+import fontfaceHandler from './fontface'
+import fontFamilyHandler from './fontFamily'
+import positionHandler from './position'
 
-async function styleAssist(fontJson) {
+export default async function styleAssist(fontJson) {
   let cssFileContent = '';
-  const fontface = tools.extractFontface(fontJson)
+  const fontface = extractFontface(fontJson)
   cssFileContent += `.rexfontinc {
     ${fontFamilyHandler(fontface)};
     font-style: normal;
     position: relative;
   }`
-  Object.entries(svgJSon.extractGlyphSets(fontJson)).forEach((glyphs, i) => {
+  Object.entries(svgJSon.extractGlyphSets(fontJson)).forEach((glyphs:any, i) => {
     glyphs[1].forEach((glyph, j) => {
       let order = parseInt(glyph.attributes.unicodeOrder)
       cssFileContent += `.${glyphs[0]}:${order ? 'after' : 'before'} {
@@ -27,5 +27,3 @@ async function styleAssist(fontJson) {
 
   return cssFileContent
 }
-
-module.exports = styleAssist;

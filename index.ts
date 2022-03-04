@@ -1,13 +1,13 @@
-const svgJson = require('svgjson');
-const svg2ttf = require('svg2ttf');
-const ttf2woff = require('ttf2woff');
-const ttf2eot = require('ttf2eot');
-const styleHandler = require('./src/style')
-const htmlHandler = require('./src/html')
-const fs = require('fs');
-const tools = require('./helpers/tools')
+import svgJson from 'svgjson'
+import svg2ttf from 'svg2ttf'
+import ttf2woff from 'ttf2woff'
+import ttf2eot from 'ttf2eot'
+import styleHandler from './src/style'
+import htmlHandler from './src/html'
+import fs from 'fs'
+import {readFiles} from './helpers/tools'
 
-function write(opt) {
+export function write(opt) {
   return handleInput(opt)
   .then(fontAssist)
   .then(fontAssistWrite)
@@ -15,7 +15,7 @@ function write(opt) {
   .then(fontFormatsWrite)
 }
 
-function get(opt) {
+export function get(opt) {
   return handleInput(opt)
   .then(async ({ fontSvg, fontname }) => ({
     ...await fontAssist({ fontSvg, fontname }),
@@ -55,7 +55,7 @@ function handleInput(opt) {
 async function mergeSvgs(svgFiles) {
   let content = ''
   // get informations
-  const svgsData = await tools.readFiles(svgFiles)
+  const svgsData = await readFiles(svgFiles)
   .then(svgsData => svgJson.encodeClasses(svgsData))
   const svgsPathes = svgsData.map(svgJson.extractPathes)
   const svgsStyles = svgsData.map(svgJson.extractStyles)
@@ -123,8 +123,3 @@ function fontFormatsWrite({ fontname, svg2ttfbuf, ttf2woffbuf, ttf2eotbuf }) {
   fs.writeFileSync(`./${fontname}/font.woff`, ttf2woffbuf)
   fs.writeFileSync(`./${fontname}/font.eot`, ttf2eotbuf)
 }
-
-module.exports = {
-  write,
-  get,
-};

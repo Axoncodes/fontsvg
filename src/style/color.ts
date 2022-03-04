@@ -1,6 +1,6 @@
 const xjs = require('@axoncodes/xjs')
 
-function colorHandler(glyph) {
+export default function colorHandler(glyph) {
   let subfileContent = '';
   if (xjs.if(glyph, 'glyph.attributes.opacity') || xjs.if(glyph, 'glyph.attributes.color')) {
     subfileContent += xjs.if(glyph, 'glyph.attributes.opacity') ? `opacity: ${glyph.attributes.opacity};` : '';
@@ -8,5 +8,3 @@ function colorHandler(glyph) {
   }
   return subfileContent;
 }
-
-module.exports = colorHandler
