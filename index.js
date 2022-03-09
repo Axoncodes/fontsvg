@@ -1,11 +1,10 @@
-const svgJson = require('svgjson');
+const svgjson = require('svgjson');
 const svg2ttf = require('svg2ttf');
 const ttf2woff = require('ttf2woff');
 const ttf2eot = require('ttf2eot');
 const styleHandler = require('./src/style')
 const htmlHandler = require('./src/html')
 const fs = require('fs');
-const tools = require('./helpers/tools')
 
 function write(opt) {
   return handleInput(opt)
@@ -17,111 +16,70 @@ function write(opt) {
 
 function get(opt) {
   return handleInput(opt)
-  .then(async ({ fontSvg, fontname }) => ({
-    ...await fontAssist({ fontSvg, fontname }),
-    ...fontFormats({ fontSvg, fontname })
-  }))
-}
-
-/**
- *  
- * @param {array} svgFiles Array of SVG files addresses to be converted into single font
- * @param {string} fontsvgFile Otherwise, it would be a fontsvgFile requsted to parse to ttf file
- * @param {string} filename The name of the file for the ttf font to be stored in
- * @retuen returnes the ttf file
- */
-function handleInput(opt) {
-  // info handling
-  const { svgFiles, fontsvgFile } = opt
-  let { fontname, unicodePrefix } = opt
-  if ((!svgFiles || !svgFiles.length) && !fontsvgFile) throw 'ERROR: No Input file was provided'
-  if (!fontname) fontname = 'rexfont'
-  if (!unicodePrefix) unicodePrefix = 'RX'
-
-  if (svgFiles) {
-    // read and merge the files
-    return mergeSvgs(svgFiles)
-    // otherwise, convert the svg file to fontsvg and then return
-    .then(input => svgJson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }))
-    .then(fontSvg => ({ fontSvg, fontname }))
-  } else {
-    // read the file (whether svg or fontsvg)
-    return fs.readFileSync(fontsvgFile, 'utf8')
-    // if the parameter fontsvgFile was availabel, then just return the file content
-    .then(fontSvg => ({ fontSvg, fontname }))
-  }
-}
-
-async function mergeSvgs(svgFiles) {
-  let content = ''
-  // get informations
-  const svgsData = await tools.readFiles(svgFiles)
-  .then(svgsData => svgJson.encodeClasses(svgsData))
-  const svgsPathes = svgsData.map(svgJson.extractPathes)
-  const svgsStyles = svgsData.map(svgJson.extractStyles)
-
-  // generate the singular svg file
-  content += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${svgsData[0][0].attributes.viewBox.toString().replaceAll(',', ' ')}>\n`
-  content += `<defs>`
-  if (svgsStyles.flat().flat().length > 0) {
-    content += `<style>`
-    svgsStyles.flat().flat().forEach((style, i) => {
-      content += `${style[0]} {`
-      style[1].forEach(properties => {
-        if (properties && properties.length)
-          content += `${properties.toString().replaceAll(',', ':')};`
-      })
-      content += `}\n`
-    })
-    content += `</style>`
-  }
-  content += `</defs>`
-  
-  svgsPathes.forEach((pathes, count) => {
-    pathes.forEach(path => {
-      let cclass = path.attributes && path.attributes.class ? path.attributes.class  : ''
-      content += path.tag == 'path' ? `<path class="${cclass}" rxcode="${count}" d="${path.attributes.d}"/>\n` : (path.tag == 'g' ? `<${path.tag} class="${cclass}">` : '</g>')
+  .then(async ({ fontSvg, fontname, suffix, weight }) => {
+    return ({
+      weight,
+      ...await fontAssist({ fontSvg, fontname, suffix, weight }),
+      ...fontFormats({ fontSvg, fontname, suffix })
     })
   })
-  content += `</svg>`
-  return content
 }
 
-function fontAssist({ fontSvg, fontname }) {
-  return svgJson.parseJson(fontSvg)
+function handleInput(opt) {
+  // info handling
+  const { weight, suffix, svgFiles, fontsvgFile, fontname='rexfont', unicodePrefix='RX', namesMode=false } = opt
+  if ((!svgFiles || !svgFiles.length) && !fontsvgFile) throw 'ERROR: No Input file was provided'
+  let suffixvar = suffix ? `-${suffix.replaceAll(/[- ]/g, '_')}` : '';
+  if (svgFiles) {
+    // read and merge the files
+    return svgjson.mergeSvgs(svgFiles, namesMode)
+    // otherwise, convert the svg file to fontsvg and then return
+    .then(input => svgjson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }))
+    .then(fontSvg => ({ fontSvg, fontname, suffix: suffixvar, weight }))
+  } else {
+    // if the parameter fontsvgFile was availabel, then just return the file content
+    return fs.readFileSync(fontsvgFile, 'utf8')
+    .then(fontSvg => ({ fontSvg, fontname, suffix: suffixvar, weight }))
+  }
+}
+
+function fontAssist({ fontSvg, fontname, suffix, weight }) {
+  return svgjson.parseJson(fontSvg)
   .then(async fontJson => ({
-    html: await htmlHandler(fontJson),
-    style: await styleHandler(fontJson),
+    html: await htmlHandler(fontJson, suffix),
+    style: await styleHandler(fontJson, suffix, weight),
     fontname,
     fontJson,
     fontSvg,
+    suffix,
   }));
 }
 
-function fontAssistWrite({ style, html, fontname, fontSvg }) {
-  if (!fs.existsSync(`./${fontname}`)) fs.mkdirSync(`./${fontname}`);
-  fs.writeFileSync(`./${fontname}/fontsvg.svg`, fontSvg)
-  fs.writeFileSync(`./${fontname}/font.css`, style)
-  fs.writeFileSync(`./${fontname}/index.html`, html)
-  return ({ fontSvg, fontname });
+function fontAssistWrite({ style, html, fontname, fontSvg, suffix }) {
+  if (!fs.existsSync(`./${fontname}${suffix}`)) fs.mkdirSync(`./${fontname}${suffix}`);
+  fs.writeFileSync(`./${fontname}${suffix}/fontsvg${suffix}.svg`, fontSvg)
+  fs.writeFileSync(`./${fontname}${suffix}/font${suffix}.css`, style)
+  fs.writeFileSync(`./${fontname}${suffix}/index${suffix}.html`, html)
+  return ({ fontSvg, fontname, suffix });
 }
 
-function fontFormats({ fontSvg, fontname }) {
+function fontFormats({ fontSvg, fontname, suffix }) {
   const svg2ttfbuf = svg2ttf(fontSvg)
   const ttf2woffbuf = ttf2woff(svg2ttfbuf)
   const ttf2eotbuf = ttf2eot(svg2ttfbuf)
   return ({
     fontname,
+    suffix,
     svg2ttfbuf: Buffer.from(svg2ttfbuf.buffer),
     ttf2woffbuf: Buffer.from(ttf2woffbuf),
     ttf2eotbuf: Buffer.from(ttf2eotbuf),
   });
 }
 
-function fontFormatsWrite({ fontname, svg2ttfbuf, ttf2woffbuf, ttf2eotbuf }) {
-  fs.writeFileSync(`./${fontname}/font.ttf`, svg2ttfbuf)
-  fs.writeFileSync(`./${fontname}/font.woff`, ttf2woffbuf)
-  fs.writeFileSync(`./${fontname}/font.eot`, ttf2eotbuf)
+function fontFormatsWrite({ fontname, svg2ttfbuf, ttf2woffbuf, ttf2eotbuf, suffix }) {
+  fs.writeFileSync(`./${fontname}${suffix}/font${suffix}.ttf`, svg2ttfbuf)
+  fs.writeFileSync(`./${fontname}${suffix}/font${suffix}.woff`, ttf2woffbuf)
+  fs.writeFileSync(`./${fontname}${suffix}/font${suffix}.eot`, ttf2eotbuf)
 }
 
 module.exports = {
