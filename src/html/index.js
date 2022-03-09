@@ -1,4 +1,4 @@
-const svgJSon = require('../../../svgjson')
+const svgJSon = require('svgjson')
 
 async function htmlAssist(fontJson, suffix) {
   let htmlFileContent = `<html><head>
