@@ -25,14 +25,23 @@ function get(opt) {
   })
 }
 
-function handleInput(opt) {
+function handleInput({
+  weight,
+  suffix,
+  svgFiles,
+  svgsData,
+  fontsvgFile,
+  fontname='rexfont',
+  unicodePrefix='RX',
+  namesMode=false,
+}) {
   // info handling
-  const { weight, suffix, svgFiles, fontsvgFile, fontname='rexfont', unicodePrefix='RX', namesMode=false } = opt
-  if ((!svgFiles || !svgFiles.length) && !fontsvgFile) throw 'ERROR: No Input file was provided'
+  if ((!svgsData || !svgsData.length) && (!svgFiles || !svgFiles.length) && !fontsvgFile) throw 'ERROR: No Input file was provided'
   let suffixvar = suffix ? `-${suffix.replaceAll(/[- ]/g, '_')}` : '';
-  if (svgFiles) {
-    // read and merge the files
-    return svgjson.mergeSvgs(svgFiles, namesMode)
+  if (svgFiles || svgsData) {
+    // read and merge the files 
+    return Promise.resolve(svgsData || svgjson.readFiles(svgFiles))
+    .then(svgsData => svgjson.mergeSvgs(svgsData, namesMode))
     // otherwise, convert the svg file to fontsvg and then return
     .then(input => svgjson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }))
     .then(fontSvg => ({ fontSvg, fontname, suffix: suffixvar, weight }))
