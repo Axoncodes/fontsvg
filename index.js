@@ -41,7 +41,8 @@ function handleInput({
   if (svgFiles || svgsData) {
     // read and merge the files 
     return Promise.resolve(svgsData || svgjson.readFiles(svgFiles))
-    .then(svgsData => svgjson.mergeSvgs(svgsData, namesMode))
+    .then(svgsData => 
+      svgjson.mergeSvgs(svgsData, namesMode))
     // otherwise, convert the svg file to fontsvg and then return
     .then(input => svgjson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }))
     .then(fontSvg => ({ fontSvg, fontname, suffix: suffixvar, weight }))
