@@ -1,4 +1,4 @@
-const svgjson = require('svgjson');
+const svgjson = require('../svgjson');
 const svg2ttf = require('svg2ttf');
 const ttf2woff = require('ttf2woff');
 const ttf2eot = require('ttf2eot');
@@ -41,8 +41,9 @@ function handleInput({
   if (svgFiles || svgsData) {
     // read and merge the files 
     return Promise.resolve(svgsData || svgjson.readFiles(svgFiles))
-    .then(svgsData => 
-      svgjson.mergeSvgs(svgsData, namesMode))
+    .then(svgsData => svgsData.map(svgdata => svgjson.parseJson(svgdata)))
+    .then(svgjson.encodeClasses)
+    .then(svgsData => svgjson.mergeSvgs(svgsData, namesMode))
     // otherwise, convert the svg file to fontsvg and then return
     .then(input => svgjson.convert({ outputFormat: 'fontsvg', input, fontname, unicodePrefix }))
     .then(fontSvg => ({ fontSvg, fontname, suffix: suffixvar, weight }))
@@ -54,7 +55,7 @@ function handleInput({
 }
 
 function fontAssist({ fontSvg, fontname, suffix, weight }) {
-  return svgjson.parseJson(fontSvg)
+  return svgjson.parseJsonSync(fontSvg)
   .then(async fontJson => ({
     html: await htmlHandler(fontJson, suffix),
     style: await styleHandler(fontJson, suffix, weight),

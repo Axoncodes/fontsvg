@@ -8,7 +8,7 @@ const positionHandler = require('./position')
 async function styleAssist(fontJson, suffix, weight) {
   let cssFileContent = '';
   const fontface = tools.extractFontface(fontJson)
-  cssFileContent += `.rexfontinc {
+  cssFileContent += `.rexfont_init {
     ${fontFamilyHandler(fontface)};
     font-style: normal;
     position: relative;

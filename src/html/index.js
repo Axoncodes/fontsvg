@@ -6,8 +6,7 @@ async function htmlAssist(fontJson, suffix) {
     </head><body>
   `;
   Object.entries(svgJSon.extractGlyphSets(fontJson)).forEach((glyphs, i) => {
-    // tag.attributes.unicodeOrder == '0'
-    htmlFileContent += `<i class="${glyphs[1][0].attributes["fontsize"] ? 'rx_fontsize' : ''} ${glyphs[1][0].attributes["fill"] ? 'rx_color' : ''} ${glyphs[1][0].attributes["glyph-name"]} rexfontinc"></i>\n`;
+    htmlFileContent += `<i class="${glyphs[1][0].attributes["fontsize"] ? 'rx_fontsize' : ''} ${glyphs[1][0].attributes["fill"] ? 'rx_color' : ''} ${glyphs[1][0].attributes["glyph-name"]} rexfont_init"></i>\n`;
   })
   htmlFileContent += `</body></html>`;
   return htmlFileContent
