@@ -32,15 +32,30 @@ There will be a folder generated with the fontname selected(or default), includi
 - index.html
 - font.css
 
-#### New feature :
-Ability to handle multiple icons(merge icons)
+# Ability to handle multiple icons(merge icons)
 
 #### Example (the 'get' method) :
 ```
 const parseFont = require('parsefont')
-const options = { svgFile: './alien.svg', fontname: 'ifont', unicodePrefix: 'RXXk' }
+const options = { 
+  svgFile: './alien.svg',
+  fontname: 'ifont',
+  unicodePrefix: 'RXXk'
+}
 await fontsvg.get(options)
 ```
+you can now pass your custom style to be printed in the header of html file. 
+example: 
+```
+const options = { 
+  svgFile: './alien.svg',
+  fontname: 'ifont',
+  unicodePrefix: 'RXXk',
+  customHeadStyle: ".title {color: red}"
+}
+await fontsvg.get(options)
+```
+
 ##### Outcome :
 This method will return you the data that of the files that would be written to the files as previous
 
@@ -58,6 +73,24 @@ This method will return you the data that of the files that would be written to 
 ```
 
 You can use the html file to examine the generated fonts and use the css file as initial css required
+
+
+#### getSingleDoc -> get files directly
+##### usage
+```
+await fontsvg.get(getSingleDoc)
+```
+#### output
+```
+{
+  svg2ttfbuf(buffer),
+  ttf2woffbuf(buffer),
+  ttf2eotbuf(buffer),
+  stylefile(string),
+  htmlfile(string),
+}
+```
+
 
 ## Web Interface
 You can also convert your icons through this interface which is powered by an API using the same parsefont module
