@@ -1,8 +1,8 @@
 const svgJSon = require('svgjson')
 
-async function htmlAssist(fontJson, suffix) {
+async function htmlAssist({fontJson, suffix, customHeadStyle}) {
   let htmlFileContent = `<html><head>
-      <link rel="stylesheet" href="./font${suffix}.css" />
+      ${customHeadStyle ? `<style>${customHeadStyle}</style>` :  `<link rel="stylesheet" href="./font${suffix}.css" />`}
     </head><body>
   `;
   Object.entries(svgJSon.extractGlyphSets(fontJson)).forEach((glyphs, i) => {
