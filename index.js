@@ -5,6 +5,7 @@ const ttf2eot = require('ttf2eot');
 const styleHandler = require('./src/style')
 const htmlHandler = require('./src/html')
 const fs = require('fs');
+const path = require('path');
 
 function write(opt) {
   return handleInput(opt)
@@ -19,8 +20,30 @@ function get(opt) {
   .then(async ({ fontSvg, fontname, suffix, weight }) => {
     return ({
       weight,
-      ...await fontAssist({ fontSvg, fontname, suffix, weight }),
+      ...await fontAssist({ fontSvg, fontname, suffix, weight, customHeadStyle: opt.customHeadStyle }),
       ...fontFormats({ fontSvg, fontname, suffix })
+    })
+  })
+}
+
+function getSingleDoc(opt) {
+  return handleInput(opt)
+  .then(async ({ fontSvg, suffix, weight }) => {
+
+    const svg2ttfbuf = svg2ttf(fontSvg)
+    const ttf2woffbuf = ttf2woff(svg2ttfbuf)
+    const ttf2eotbuf = ttf2eot(svg2ttfbuf)
+
+    const fontJson = await svgjson.parseJsonSync(fontSvg)
+    const stylefile = await styleHandler({fontJson, suffix, weight, prefix: opt.customprefix})
+    const htmlfile = await htmlHandler({fontJson, suffix, customHeadStyle: stylefile})
+
+    return ({
+      svg2ttfbuf: Buffer.from(svg2ttfbuf.buffer),
+      ttf2woffbuf: Buffer.from(ttf2woffbuf),
+      ttf2eotbuf: Buffer.from(ttf2eotbuf),
+      stylefile,
+      htmlfile,
     })
   })
 }
@@ -54,11 +77,11 @@ function handleInput({
   }
 }
 
-function fontAssist({ fontSvg, fontname, suffix, weight }) {
+function fontAssist({ fontSvg, fontname, suffix, weight, customHeadStyle }) {
   return svgjson.parseJsonSync(fontSvg)
   .then(async fontJson => ({
-    html: await htmlHandler(fontJson, suffix),
-    style: await styleHandler(fontJson, suffix, weight),
+    html: await htmlHandler({fontJson, suffix, customHeadStyle}),
+    style: await styleHandler({fontJson, suffix, weight}),
     fontname,
     fontJson,
     fontSvg,
@@ -96,4 +119,5 @@ function fontFormatsWrite({ fontname, svg2ttfbuf, ttf2woffbuf, ttf2eotbuf, suffi
 module.exports = {
   write,
   get,
+  getSingleDoc,
 };
