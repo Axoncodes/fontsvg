@@ -5,7 +5,7 @@ const fontfaceHandler = require('./fontface')
 const fontFamilyHandler = require('./fontFamily')
 const positionHandler = require('./position')
 
-async function styleAssist(fontJson, suffix, weight) {
+async function styleAssist({fontJson, suffix, weight, prefix}) {
   let cssFileContent = '';
   const fontface = tools.extractFontface(fontJson)
   cssFileContent += `.rexfont_init {
@@ -37,7 +37,7 @@ async function styleAssist(fontJson, suffix, weight) {
       }\n`
     })
   })
-  cssFileContent += fontfaceHandler(fontface, suffix, weight);
+  cssFileContent += fontfaceHandler(fontface, suffix, weight, prefix);
 
   return cssFileContent
 }
